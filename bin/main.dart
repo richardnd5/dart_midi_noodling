@@ -3,5 +3,6 @@ import '../remove_melody_two.dart';
 
 void main() {
   // runMidiProgram();
-  removeMelody();
+  var midiFile = removeMelody();
+  writeToFile('removedMelody', midiFile);
 }
