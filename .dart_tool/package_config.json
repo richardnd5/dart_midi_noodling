@@ -1,0 +1,19 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "dart_midi",
+      "rootUri": "file:///Users/nrichard/.pub-cache/hosted/pub.dartlang.org/dart_midi-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.1"
+    },
+    {
+      "name": "midi_parsing",
+      "rootUri": "../",
+      "packageUri": "lib/"
+    }
+  ],
+  "generated": "2020-07-11T21:02:44.274479Z",
+  "generator": "pub",
+  "generatorVersion": "2.8.4"
+}
