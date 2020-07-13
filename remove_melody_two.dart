@@ -1,39 +1,68 @@
 import 'package:dart_midi/dart_midi.dart';
 import 'remove_melody_from_piano.dart';
 
+bool noteEventMatches(
+  MidiEventWithGlobalTime rightHand,
+  MidiEventWithGlobalTime allPiano,
+) {
+  return rightHand.globalTime == allPiano.globalTime &&
+      rightHand.number == allPiano.number;
+}
+
 MidiFile removeMelody() {
-  String allPianoFileName = "allPianoLong";
-  String rightHandFileName = "rightHandLong";
+  String allPianoFileName = "Untitled";
+  // String rightHandFileName = "1rightHand";
 
   MidiFile allPiano = getMidiFileFrom(allPianoFileName);
-  MidiFile rightHand = getMidiFileFrom(rightHandFileName);
+  // MidiFile rightHand = getMidiFileFrom(rightHandFileName);
 
-  var pianoEventList = getEventsWithGlobalTime(allPiano.tracks.first);
-  var rightHandEventList = getEventsWithGlobalTime(rightHand.tracks.first);
+  var pianoEventList = getEventsWithGlobalTime(allPiano.tracks[2]);
+  var rightHandEventList = getEventsWithGlobalTime(allPiano.tracks[1]);
 
   List<MidiEventWithGlobalTime> leftHandEventList = [];
 
+  MidiEventWithGlobalTime previousNotAddedNote;
   for (var i = 0; i < pianoEventList.length; i++) {
-    var element = pianoEventList[i];
-    if (element.type == MidiEventGlobalType.noteOn ||
-        element.type == MidiEventGlobalType.noteOff) {
-      if (rightHandEventList.firstWhere(
-              (rightHand) => rightHand.globalTime == element.globalTime,
-              orElse: () => null) !=
-          null) {
+    var currentPianoEvent = pianoEventList[i];
+
+    if (currentPianoEvent.type == MidiEventGlobalType.noteOn ||
+        currentPianoEvent.type == MidiEventGlobalType.noteOff) {
+      var rightHandNotes = rightHandEventList.where((currentPianoEvent) =>
+          currentPianoEvent.noteOnEvent != null ||
+          currentPianoEvent.noteOffEvent != null);
+
+      var allMatching = rightHandNotes
+          .where(
+            (rightHand) =>
+                rightHand.globalTime == currentPianoEvent.globalTime &&
+                rightHand.number == currentPianoEvent.number,
+          )
+          .toList();
+
+      if (allMatching.length == 1) {
         if (i < pianoEventList.length) {
           pianoEventList[i + 1].event.deltaTime +=
-              pianoEventList[i].event.deltaTime;
+              currentPianoEvent.event.deltaTime;
+          previousNotAddedNote = currentPianoEvent;
         }
       } else {
-        leftHandEventList.add(element);
+        leftHandEventList.add(currentPianoEvent);
+        previousNotAddedNote = null;
       }
     } else {
-      leftHandEventList.add(element);
+      leftHandEventList.add(currentPianoEvent);
+      previousNotAddedNote = null;
     }
   }
 
-  MidiHeader header = allPiano.header;
+  MidiHeader header = new MidiHeader(
+    framesPerSecond: allPiano.header.framesPerSecond,
+    ticksPerBeat: allPiano.header.ticksPerBeat,
+    ticksPerFrame: allPiano.header.ticksPerFrame,
+    numTracks: 1,
+    format: allPiano.header.format,
+    timeDivision: allPiano.header.timeDivision,
+  );
 
   var trackEvents = leftHandEventList.map((e) => e.event).toList();
 
@@ -51,27 +80,42 @@ List<MidiEventWithGlobalTime> getEventsWithGlobalTime(
   midiEvents.forEach((element) {
     globalTime += element.deltaTime;
 
-    MidiEventGlobalType type;
     switch (element.type) {
       case 'noteOn':
-        type = MidiEventGlobalType.noteOn;
+        NoteOnEvent event = element;
+        eventMap.add(MidiEventWithGlobalTime(
+            globalTime: globalTime,
+            event: element,
+            number: event.noteNumber,
+            type: MidiEventGlobalType.noteOn,
+            noteOnEvent: event));
         break;
       case 'noteOff':
-        type = MidiEventGlobalType.noteOff;
+        NoteOffEvent event = element;
+        eventMap.add(MidiEventWithGlobalTime(
+            globalTime: globalTime,
+            event: element,
+            number: event.noteNumber,
+            type: MidiEventGlobalType.noteOff,
+            noteOffEvent: event));
+
         break;
       case 'controller':
-        type = MidiEventGlobalType.controller;
+        eventMap.add(MidiEventWithGlobalTime(
+            globalTime: globalTime,
+            event: element,
+            type: MidiEventGlobalType.controller,
+            controllerEvent: element as ControllerEvent));
+
         break;
       default:
-        type = MidiEventGlobalType.other;
+        eventMap.add(MidiEventWithGlobalTime(
+          globalTime: globalTime,
+          event: element,
+          type: MidiEventGlobalType.other,
+        ));
         break;
     }
-
-    eventMap.add(MidiEventWithGlobalTime(
-      globalTime: globalTime,
-      event: element,
-      type: type,
-    ));
   });
   return eventMap;
 }
@@ -80,15 +124,29 @@ List<MidiEventWithGlobalTime> getEventsWithGlobalTime(
 class MidiEventWithGlobalTime {
   int globalTime;
   MidiEvent event;
+  int number;
+
+  NoteOnEvent noteOnEvent;
+  NoteOffEvent noteOffEvent;
+  ControllerEvent controllerEvent;
   MidiEventGlobalType type;
 
   MidiEventWithGlobalTime({
     int globalTime,
     MidiEvent event,
+    int number,
+    NoteOnEvent noteOnEvent,
+    NoteOffEvent noteOffEvent,
+    ControllerEvent controllerEvent,
     MidiEventGlobalType type,
   }) {
     this.globalTime = globalTime;
     this.event = event;
+    this.number = number;
+
+    this.noteOnEvent = noteOnEvent;
+    this.noteOffEvent = noteOffEvent;
+    this.controllerEvent = controllerEvent;
     this.type = type;
   }
 }

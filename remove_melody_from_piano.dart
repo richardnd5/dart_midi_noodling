@@ -198,7 +198,7 @@ List<CustomMidiEvent> getNoteDurationEventsFromMidiTrack(
 }
 
 MidiFile getMidiFileFrom(String fileName) {
-  var file = File('$fileName.mid');
+  var file = File('../$fileName.mid');
   return MidiParser().parseMidiFromFile(file);
 }
 
