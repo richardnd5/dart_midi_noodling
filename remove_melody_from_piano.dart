@@ -198,11 +198,11 @@ List<CustomMidiEvent> getNoteDurationEventsFromMidiTrack(
 }
 
 MidiFile getMidiFileFrom(String fileName) {
-  var file = File('../$fileName.mid');
+  var file = File('./$fileName.mid');
   return MidiParser().parseMidiFromFile(file);
 }
 
 void writeToFile(String fileName, MidiFile midiFile) {
   var writer = MidiWriter();
-  writer.writeMidiToFile(midiFile, File('../$fileName.mid'));
+  writer.writeMidiToFile(midiFile, File('./$fileName.mid'));
 }
