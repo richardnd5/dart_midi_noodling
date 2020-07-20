@@ -1,5 +1,5 @@
 import 'package:dart_midi/dart_midi.dart';
-import 'midi_event_with_global_type.dart';
+import '../enums/midi_event_with_global_type.dart';
 
 // separate file
 class MidiEventWithGlobalTime {

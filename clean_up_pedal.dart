@@ -1,8 +1,8 @@
 import 'package:dart_midi/dart_midi.dart';
 import 'remove_melody_from_piano.dart';
 import 'remove_melody_two.dart';
-import 'midi_event_with_global_type.dart';
-import 'midi_event_with_global_time.dart';
+import 'enums/midi_event_with_global_type.dart';
+import 'models/midi_event_with_global_time.dart';
 
 MidiFile cleanUpPedal() {
   String allPianoFileName = "fiveNoteScale60";
