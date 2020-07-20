@@ -1,5 +1,7 @@
 import 'package:dart_midi/dart_midi.dart';
 import 'remove_melody_from_piano.dart';
+import 'models/midi_event_with_global_time.dart';
+import 'enums/midi_event_with_global_type.dart';
 
 bool noteEventMatches(
   MidiEventWithGlobalTime rightHand,
@@ -121,35 +123,3 @@ List<MidiEventWithGlobalTime> getEventsWithGlobalTime(
 }
 
 // separate file
-class MidiEventWithGlobalTime {
-  int globalTime;
-  MidiEvent event;
-  int number;
-
-  NoteOnEvent noteOnEvent;
-  NoteOffEvent noteOffEvent;
-  ControllerEvent controllerEvent;
-  MidiEventGlobalType type;
-
-  MidiEventWithGlobalTime({
-    int globalTime,
-    MidiEvent event,
-    int number,
-    NoteOnEvent noteOnEvent,
-    NoteOffEvent noteOffEvent,
-    ControllerEvent controllerEvent,
-    MidiEventGlobalType type,
-  }) {
-    this.globalTime = globalTime;
-    this.event = event;
-    this.number = number;
-
-    this.noteOnEvent = noteOnEvent;
-    this.noteOffEvent = noteOffEvent;
-    this.controllerEvent = controllerEvent;
-    this.type = type;
-  }
-}
-
-// separate file
-enum MidiEventGlobalType { noteOn, noteOff, controller, other }

@@ -1,4 +1,5 @@
 import 'package:dart_midi/dart_midi.dart';
+import 'dart:math';
 
 MidiFile createMidiFile() {
   print('printing!');
@@ -27,31 +28,62 @@ MidiFile createMidiFile() {
   return midiFile;
 }
 
+NoteOnEvent createNoteOn({int number, int velocity, int delta}) {
+  NoteOnEvent noteOn = NoteOnEvent();
+  noteOn.deltaTime = delta;
+  noteOn.noteNumber = number;
+  noteOn.velocity = velocity;
+  noteOn.channel = 0;
+  noteOn.useByte9ForNoteOff = false;
+  noteOn.running = false;
+  noteOn.meta = false;
+  noteOn.byte9 = false;
+  noteOn.type = 'noteOn';
+
+  return noteOn;
+}
+
+NoteOffEvent createNoteOff({int number, int delta}) {
+  NoteOffEvent noteOff = NoteOffEvent();
+  noteOff.deltaTime = delta;
+  noteOff.noteNumber = number;
+  noteOff.channel = 0;
+  noteOff.byte9 = true;
+  noteOff.meta = false;
+  noteOff.useByte9ForNoteOff = false;
+  noteOff.type = 'noteOff';
+  noteOff.velocity = 0;
+
+  return noteOff;
+}
+
 List<MidiEvent> createNotes() {
   List<MidiEvent> events = [];
   for (var i = 0; i < 100; i++) {
-    NoteOnEvent noteOn = NoteOnEvent();
-    noteOn.deltaTime = 50;
-    noteOn.noteNumber = 60;
-    noteOn.velocity = 90;
-    noteOn.channel = 0;
-    noteOn.useByte9ForNoteOff = false;
-    noteOn.running = false;
-    noteOn.meta = false;
-    noteOn.byte9 = false;
-    noteOn.type = 'noteOn';
+    List<int> cScale = [60, 62, 64, 65, 67, 69, 71, 72];
+
+    int randomInt = cScale[randomInRange(0, cScale.length)];
+
+    NoteOnEvent noteOn = createNoteOn(
+      number: randomInt,
+      velocity: 90,
+      delta: 0,
+    );
 
     events.add(noteOn);
 
-    NoteOffEvent noteOff = NoteOffEvent();
-    noteOff.deltaTime = 50;
-    noteOff.noteNumber = 60;
-    noteOff.channel = 0;
-    noteOff.byte9 = true;
-    noteOff.meta = false;
-    noteOff.useByte9ForNoteOff = false;
-    noteOff.type = 'noteOff';
-    noteOff.velocity = 0;
+    NoteOnEvent harmony = createNoteOn(
+      number: randomInt,
+      velocity: 90,
+      delta: 0,
+    );
+
+    events.add(noteOn);
+
+    NoteOffEvent noteOff = createNoteOff(
+      number: randomInt,
+      delta: 480,
+    );
 
     events.add(noteOff);
   }
@@ -181,4 +213,8 @@ EndOfTrackEvent createEndOfTrackEvent(int totalDelta) {
   event.useByte9ForNoteOff = false;
   event.type = 'endOfTrack';
   return event;
+}
+
+int randomInRange(int min, int max) {
+  return min + new Random().nextInt(max - min);
 }

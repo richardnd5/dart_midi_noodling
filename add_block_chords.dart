@@ -1,9 +1,11 @@
 import 'package:dart_midi/dart_midi.dart';
 import 'remove_melody_from_piano.dart';
 import 'remove_melody_two.dart';
+import './models/midi_event_with_global_time.dart';
+import 'enums/midi_event_with_global_type.dart';
 
 MidiFile addBlockChords() {
-  String allPianoFileName = "pedalTest";
+  String allPianoFileName = "longerMidi";
   // String rightHandFileName = "1rightHand";
 
   MidiFile allPiano = getMidiFileFrom(allPianoFileName);
@@ -17,12 +19,11 @@ MidiFile addBlockChords() {
   List<MidiEventWithGlobalTime> tempNotesInPedal = [];
   bool pedalDown = false;
 
-  pianoEventList.forEach((element) {
+  pianoEventList.asMap().forEach((index, element) {
     switch (element.type) {
       case MidiEventGlobalType.noteOn:
-        pedalDown
-            ? tempNotesInPedal.add(element)
-            : heldNotesTempStore.add(element);
+        if (pedalDown) tempNotesInPedal.add(element);
+        heldNotesTempStore.add(element);
         break;
       case MidiEventGlobalType.noteOff:
         heldNotesTempStore.removeWhere(
@@ -30,12 +31,19 @@ MidiFile addBlockChords() {
         break;
       case MidiEventGlobalType.controller:
         if (element.controllerEvent.value == 127) {
+          heldNotesTempStore.sort((a, b) => a.number.compareTo(b.number));
+          print('pedal down! notes in temp store');
+          print(heldNotesTempStore.map((e) => "${e.number} ").join());
           tempNotesInPedal.addAll(heldNotesTempStore);
           heldNotesTempStore = [];
           pedalDown = true;
         } else if (element.controllerEvent.value == 0) {
+          print('pedal up! collected notes in pedal');
+          tempNotesInPedal.sort((a, b) => a.number.compareTo(b.number));
+          print(tempNotesInPedal.map((e) => "${e.number} ").join());
           listOfChordCollections.add(tempNotesInPedal);
           tempNotesInPedal = [];
+          heldNotesTempStore = [];
           pedalDown = false;
         }
         break;
@@ -43,6 +51,10 @@ MidiFile addBlockChords() {
         break;
     }
   });
+
+  // listOfChordCollections.forEach((chord) {
+  //   print(chord.map((e) => e.number));
+  // });
 
   List<List<MidiEventWithGlobalTime>> organizedByGlobalTime =
       listOfChordCollections.map((chord) {
