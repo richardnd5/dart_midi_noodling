@@ -204,5 +204,5 @@ MidiFile getMidiFileFrom(String fileName) {
 
 void writeToFile(String fileName, MidiFile midiFile) {
   var writer = MidiWriter();
-  writer.writeMidiToFile(midiFile, File('./$fileName.mid'));
+  writer.writeMidiToFile(midiFile, File('../$fileName.mid'));
 }

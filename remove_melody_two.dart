@@ -11,11 +11,10 @@ bool noteEventMatches(
       rightHand.number == allPiano.number;
 }
 
-MidiFile removeMelody() {
-  String allPianoFileName = "Untitled";
+MidiFile removeMelody(String fileName) {
   // String rightHandFileName = "1rightHand";
 
-  MidiFile allPiano = getMidiFileFrom(allPianoFileName);
+  MidiFile allPiano = getMidiFileFrom(fileName);
   // MidiFile rightHand = getMidiFileFrom(rightHandFileName);
 
   var pianoEventList = getEventsWithGlobalTime(allPiano.tracks[2]);
